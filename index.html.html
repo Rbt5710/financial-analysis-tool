@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Analysis Tool · SME Credit Desk</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+[data-theme="light"]{
+  --bg:#F8F7F4;--bg2:#F0EEE9;
+  --surf:#FFFFFF;--surf2:#F5F3EE;--surf3:#EDEAE3;
+  --border:rgba(0,0,0,0.06);--border2:rgba(0,0,0,0.1);
+  --txt:#0C0C0A;--txt2:#4A4840;--txt3:#9A9488;
+  --acc:#1A3A2A;--acc2:#2D6A4F;--acc-light:#E8F5EE;
+  --gold:#8B6914;--gold2:#C49A27;--gold-bg:#FDF8EC;
+  --grn:#166534;--grn-bg:#F0FDF4;--grn-bdr:rgba(22,101,52,0.2);
+  --amb:#92400E;--amb-bg:#FFFBEB;--amb-bdr:rgba(146,64,14,0.2);
+  --red:#991B1B;--red-bg:#FFF1F1;--red-bdr:rgba(153,27,27,0.2);
+  --shd:0 1px 2px rgba(0,0,0,0.04),0 4px 20px rgba(0,0,0,0.05);
+  --shd2:0 8px 40px rgba(0,0,0,0.1);
+}
+[data-theme="dark"]{
+  --bg:#09100D;--bg2:#0D1610;
+  --surf:#111A14;--surf2:#182019;--surf3:#1F2A21;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --txt:#F0F5F1;--txt2:#9BAF9E;--txt3:#4A5E4D;
+  --acc:#4ADE80;--acc2:#86EFAC;--acc-light:rgba(74,222,128,0.08);
+  --gold:#F59E0B;--gold2:#FCD34D;--gold-bg:rgba(245,158,11,0.08);
+  --grn:#4ADE80;--grn-bg:rgba(74,222,128,0.08);--grn-bdr:rgba(74,222,128,0.2);
+  --amb:#FCD34D;--amb-bg:rgba(252,211,77,0.08);--amb-bdr:rgba(252,211,77,0.2);
+  --red:#F87171;--red-bg:rgba(248,113,113,0.08);--red-bdr:rgba(248,113,113,0.2);
+  --shd:0 1px 2px rgba(0,0,0,0.3),0 4px 20px rgba(0,0,0,0.3);
+  --shd2:0 8px 40px rgba(0,0,0,0.5);
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;transition:background .4s,color .4s;overflow-x:hidden}
+
+/* ── NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:999;height:64px;
+  padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(9,16,13,0.9);backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+[data-theme="light"] .nav{background:rgba(248,247,244,0.88);border-bottom:1px solid rgba(0,0,0,0.07)}
+.nav-l{display:flex;align-items:center;gap:14px}
+.nav-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#1A3A2A,#2D6A4F);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px rgba(26,58,42,0.4)}
+.nav-brand{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#F0F5F1}
+[data-theme="light"] .nav-brand{color:#0C0C0A}
+.nav-sep{width:1px;height:20px;background:var(--border2)}
+.learn-link{font-size:12px;font-weight:600;color:var(--txt3);cursor:pointer;padding:6px 12px;border-radius:8px;transition:all .2s;border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif}
+.learn-link:hover{color:var(--txt2);background:var(--surf3)}
+.nav-r{display:flex;align-items:center;gap:10px}
+.view-seg{display:flex;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:3px;gap:2px}
+[data-theme="light"] .view-seg{background:var(--surf3);border-color:var(--border)}
+.vseg{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+[data-theme="light"] .vseg{color:var(--txt3)}
+.vseg.on{background:var(--acc);color:#fff}
+[data-theme="dark"] .vseg.on{color:#09100D}
+.theme-btn{width:36px;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+[data-theme="light"] .theme-btn{border-color:var(--border2);background:var(--surf2)}
+.theme-btn:hover{transform:scale(1.05)}
+
+/* ── HERO ── */
+.hero{
+  min-height:92vh;position:relative;display:flex;align-items:center;
+  overflow:hidden;padding-top:64px;
+}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#06100A 0%,#0D1F14 45%,#162B1C 75%,#0A1810 100%)}
+.hero-photo{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1800&q=80') center/cover;opacity:0.07;mix-blend-mode:luminosity}
+.hero-mesh{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 65% 35%,rgba(45,106,79,0.22) 0%,transparent 65%),
+    radial-gradient(ellipse 45% 40% at 15% 75%,rgba(196,154,39,0.12) 0%,transparent 55%);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 90% 90% at 50% 50%,black 40%,transparent 100%);
+}
+.hero-orb{position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(45,106,79,0.18),transparent 70%);top:-80px;right:8%;animation:orb 9s ease-in-out infinite}
+@keyframes orb{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.05)}}
+.hero-curve{position:absolute;bottom:-1px;left:0;right:0;height:64px;background:var(--bg);clip-path:ellipse(54% 100% at 50% 100%)}
+
+.hero-inner{position:relative;z-index:2;max-width:1060px;margin:0 auto;padding:0 2.5rem;width:100%;display:grid;grid-template-columns:1.1fr 0.9fr;gap:5rem;align-items:center}
+.hero-l{animation:hIn .8s ease both}
+@keyframes hIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.hero-chip{display:inline-flex;align-items:center;gap:7px;background:rgba(45,106,79,0.18);border:1px solid rgba(74,222,128,0.2);color:#86EFAC;font-size:10.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:1.75rem}
+.chip-dot{width:5px;height:5px;border-radius:50%;background:#4ADE80;animation:pd 2s infinite}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero-h1{font-family:'Playfair Display',serif;font-size:clamp(34px,4.5vw,64px);font-weight:900;color:#F0F5F1;line-height:1.08;letter-spacing:-0.025em;margin-bottom:1.25rem}
+.hero-h1 em{font-style:italic;background:linear-gradient(135deg,#4ADE80,#86EFAC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{color:rgba(240,245,241,0.45);font-size:15px;line-height:1.8;margin-bottom:2.25rem;max-width:440px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn-hero{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2D6A4F,#1A3A2A);color:#fff;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:700;border:1px solid rgba(74,222,128,0.18);cursor:pointer;box-shadow:0 6px 28px rgba(45,106,79,0.35);transition:all .25s;font-family:'Plus Jakarta Sans',sans-serif}
+.btn-hero:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(45,106,79,0.45)}
+.btn-hero-ghost{display:inline-flex;align-items:center;gap:8px;color:rgba(240,245,241,0.5);padding:14px 20px;border-radius:12px;font-size:14px;font-weight:600;border:1px solid rgba(255,255,255,0.1);cursor:pointer;transition:all .25s;font-family:'Plus Jakarta Sans',sans-serif;background:transparent}
+.btn-hero-ghost:hover{border-color:rgba(255,255,255,0.22);color:rgba(240,245,241,0.85)}
+
+/* HERO PREVIEW CARD */
+.hero-r{animation:hIn .8s .15s ease both}
+.preview-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:1.5rem}
+.pc-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(240,245,241,0.3);margin-bottom:1rem}
+.pc-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pc-m{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px}
+.pc-m-lbl{font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(240,245,241,0.3);margin-bottom:5px}
+.pc-m-val{font-family:'Fira Code',monospace;font-size:20px;font-weight:500;line-height:1}
+.v-g{color:#4ADE80}.v-a{color:#FCD34D}.v-r{color:#F87171}
+.pc-m-tag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;margin-top:5px}
+.tg-g{background:rgba(74,222,128,0.12);color:#4ADE80}
+.tg-a{background:rgba(252,211,77,0.12);color:#FCD34D}
+.tg-r{background:rgba(248,113,113,0.12);color:#F87171}
+.pc-bar{height:3px;background:rgba(255,255,255,0.06);border-radius:100px;margin-top:10px;overflow:hidden}
+.pc-bar-f{height:100%;border-radius:100px}
+.bf-g{background:linear-gradient(90deg,#1A3A2A,#4ADE80)}
+.bf-a{background:linear-gradient(90deg,#92400E,#FCD34D)}
+.bf-r{background:linear-gradient(90deg,#991B1B,#F87171)}
+
+/* ── TRUST ── */
+.trust{background:var(--surf);border-bottom:1px solid var(--border);padding:.7rem 2.5rem;display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+.ti{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--txt3)}
+.ti-dot{width:5px;height:5px;border-radius:50%;background:var(--grn);flex-shrink:0}
+
+/* ── MAIN ── */
+.main{max-width:1020px;margin:0 auto;padding:3rem 2rem 6rem}
+
+/* ── SECTION PHOTO BANNER ── */
+.spb{position:relative;height:180px;overflow:hidden;border-radius:18px;margin-bottom:2rem}
+.spb img{width:100%;height:100%;object-fit:cover;filter:brightness(0.45) saturate(0.7)}
+.spb-ov{position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,58,42,0.75),rgba(45,106,79,0.3));display:flex;flex-direction:column;justify-content:flex-end;padding:1.5rem 2rem}
+.spb-eye{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:5px}
+.spb-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.01em}
+.spb-sub{font-size:12px;color:rgba(255,255,255,0.55);margin-top:3px}
+
+/* ── CARD ── */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:18px;padding:1.75rem;margin-bottom:1.1rem;box-shadow:var(--shd)}
+.card-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:1.5rem;padding-bottom:1.1rem;border-bottom:1px solid var(--border)}
+.card-thumb{width:48px;height:48px;border-radius:12px;overflow:hidden;flex-shrink:0;position:relative}
+.card-thumb img{width:100%;height:100%;object-fit:cover}
+.card-thumb-ico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(0,0,0,0.25)}
+.card-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:-0.01em;margin-bottom:2px}
+.card-sub{font-size:12px;color:var(--txt3)}
+.card-badge{display:inline-flex;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;margin-left:8px;vertical-align:2px;letter-spacing:0.06em}
+.cb-prov{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bdr)}
+
+/* ── INFO BOX ── */
+.info-box{background:var(--acc-light);border:1px solid rgba(45,106,79,0.15);border-radius:10px;padding:11px 15px;font-size:12.5px;color:var(--txt2);margin-bottom:1.4rem;display:flex;gap:8px;line-height:1.6}
+[data-theme="dark"] .info-box{border-color:rgba(74,222,128,0.12)}
+
+/* ── YEAR COLS ── */
+.yr-hdr{display:grid;gap:10px;margin-bottom:10px}
+.yr-lbl{background:var(--surf2);border:1px solid var(--border);border-radius:9px;padding:8px 10px;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.05em;color:var(--txt2);line-height:1.4}
+.yr-lbl.prov{background:var(--amb-bg);border-color:var(--amb-bdr);color:var(--amb)}
+
+/* ── FIELDS ── */
+.frow{display:grid;align-items:center;gap:10px;margin-bottom:9px}
+.fl{font-size:13px;font-weight:500;color:var(--txt);line-height:1.3}
+.fh{font-size:11px;color:var(--txt3);margin-top:2px}
+.fi{border:1.5px solid var(--border2);border-radius:9px;padding:9px 12px;font-size:13px;font-family:'Fira Code',monospace;color:var(--txt);background:var(--surf2);outline:none;transition:all .2s;width:100%;text-align:right}
+.fi:focus{border-color:var(--acc2);background:var(--surf);box-shadow:0 0 0 3px var(--acc-light)}
+.fi.prov{border-color:var(--amb-bdr);background:var(--amb-bg)}
+.fi.prov:focus{border-color:var(--amb);box-shadow:0 0 0 3px var(--amb-bg)}
+
+/* ── ERR ── */
+.err{background:var(--red-bg);border:1px solid var(--red-bdr);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--red);margin-bottom:1rem;display:none}
+
+/* ── SUBMIT ── */
+.btn-analyse{width:100%;padding:17px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:none;border-radius:13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(45,106,79,0.3);transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-analyse:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(45,106,79,0.42)}
+[data-theme="dark"] .btn-analyse{color:#09100D}
+
+/* ── LOADING ── */
+.load{min-height:380px;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--surf);border:1px solid var(--border);border-radius:18px;padding:3rem;text-align:center}
+.load-photo{width:110px;height:110px;border-radius:16px;object-fit:cover;margin-bottom:1.5rem;opacity:0.55}
+.load-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--acc2);border-radius:50%;animation:spin .9s linear infinite;margin-bottom:1.1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-t{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-bottom:5px}
+.load-s{font-size:13px;color:var(--txt3)}
+
+/* ── RESULTS ── */
+.res{display:none;animation:fUp .45s ease}
+@keyframes fUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── OVERALL BANNER ── */
+.ob{border-radius:18px;overflow:hidden;margin-bottom:1.5rem;display:flex;min-height:180px}
+.ob-photo{width:280px;flex-shrink:0;position:relative}
+.ob-photo img{width:100%;height:100%;object-fit:cover}
+.ob-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.25),transparent)}
+.ob-body{flex:1;padding:2.25rem;display:flex;flex-direction:column;justify-content:center;border:1px solid;border-left:none;border-radius:0 18px 18px 0}
+.ob-g .ob-body{background:var(--grn-bg);border-color:var(--grn-bdr)}
+.ob-a .ob-body{background:var(--amb-bg);border-color:var(--amb-bdr)}
+.ob-r .ob-body{background:var(--red-bg);border-color:var(--red-bdr)}
+.ob-eye{font-size:10.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px}
+.ob-g .ob-eye{color:var(--grn)}.ob-a .ob-eye{color:var(--amb)}.ob-r .ob-eye{color:var(--red)}
+.ob-title{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;letter-spacing:-0.025em;line-height:1.1;margin-bottom:7px}
+.ob-g .ob-title{color:var(--grn)}.ob-a .ob-title{color:var(--amb)}.ob-r .ob-title{color:var(--red)}
+.ob-sub{font-size:13.5px;color:var(--txt2);line-height:1.7}
+
+/* ── RATIO GRID ── */
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:1.1rem;margin-bottom:1.5rem}
+.rc{background:var(--surf);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shd);transition:all .25s}
+.rc:hover{transform:translateY(-3px);box-shadow:var(--shd2)}
+.rc-photo{height:90px;position:relative;overflow:hidden}
+.rc-photo img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.rc:hover .rc-photo img{transform:scale(1.07)}
+.rc-ov{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:10px 13px}
+.rc-name{font-size:11px;font-weight:700;color:#fff;letter-spacing:0.03em;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+.rc-pill{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:100px;color:#fff;backdrop-filter:blur(4px)}
+.rp-g{background:rgba(74,222,128,0.22);border:1px solid rgba(74,222,128,0.35)}
+.rp-a{background:rgba(252,211,77,0.22);border:1px solid rgba(252,211,77,0.35)}
+.rp-r{background:rgba(248,113,113,0.22);border:1px solid rgba(248,113,113,0.35)}
+.rp-na{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2)}
+.rc-body{padding:1.1rem}
+.rc-bars{display:flex;align-items:flex-end;gap:8px;height:54px;margin-bottom:10px}
+.rb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.rb-track{width:100%;flex:1;background:var(--surf3);border-radius:5px;display:flex;align-items:flex-end;overflow:hidden;min-height:36px}
+.rb-fill{width:100%;border-radius:5px;transition:height 1s cubic-bezier(.34,1.56,.64,1)}
+.rb-val{font-family:'Fira Code',monospace;font-size:9.5px;font-weight:500;text-align:center}
+.rb-yr{font-size:8.5px;color:var(--txt3);text-align:center}
+.rc-bench{font-size:11px;color:var(--txt3);border-top:1px solid var(--border);padding-top:8px;line-height:1.5}
+.rc-exp{font-size:11.5px;color:var(--txt2);border-top:1px solid var(--border);padding-top:8px;margin-top:6px;line-height:1.6}
+
+/* ── TREND TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:13px;border:1px solid var(--border);box-shadow:var(--shd)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surf2);padding:11px 15px;text-align:left;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--txt3);border-bottom:1px solid var(--border2)}
+thead th:not(:first-child){text-align:right}
+tbody td{padding:11px 15px;border-bottom:1px solid var(--border);color:var(--txt2)}
+tbody td:first-child{font-weight:600;color:var(--txt)}
+tbody td:not(:first-child){text-align:right;font-family:'Fira Code',monospace;font-size:12px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surf2)}
+tbody tr.prow td{background:var(--amb-bg)}
+.cg{color:var(--grn)!important;font-weight:700!important}
+.ca{color:var(--amb)!important;font-weight:700!important}
+.cr{color:var(--red)!important;font-weight:700!important}
+.cdot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:2px}
+
+/* ── FLAGS ── */
+.flag{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:12px;margin-bottom:9px;border:1px solid;font-size:13px;line-height:1.65}
+.flag.r{background:var(--red-bg);border-color:var(--red-bdr)}
+.flag.a{background:var(--amb-bg);border-color:var(--amb-bdr)}
+.flag.g{background:var(--grn-bg);border-color:var(--grn-bdr)}
+.fi2{font-size:17px;flex-shrink:0;margin-top:1px}
+.ft{color:var(--txt2)}
+
+/* ── RM NOTE ── */
+.rm-card{border-radius:18px;overflow:hidden;display:flex;margin-bottom:1.1rem}
+.rm-photo{width:180px;flex-shrink:0;position:relative}
+.rm-photo img{width:100%;height:100%;object-fit:cover;filter:brightness(0.6) saturate(0.5)}
+.rm-photo-ov{position:absolute;inset:0;background:linear-gradient(135deg,rgba(9,16,13,0.88),rgba(26,58,42,0.65));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.25rem;gap:8px}
+.rm-av{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#C49A27,#8B6914);display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 14px rgba(196,154,39,0.35)}
+.rm-name{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:#F0F5F1;text-align:center;line-height:1.4}
+.rm-role{font-size:9.5px;color:rgba(240,245,241,0.45);text-align:center;font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+.rm-body{flex:1;background:linear-gradient(135deg,#0C1A10,#172B1C);padding:1.75rem 2rem;display:flex;flex-direction:column;justify-content:center}
+.rm-quote{font-size:14px;color:rgba(240,245,241,0.72);line-height:1.85;font-style:italic;font-family:'Playfair Display',serif}
+.rm-by{font-size:10.5px;color:rgba(196,154,39,0.75);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-top:12px}
+
+/* ── OWNER NOTE ── */
+.owner-note{background:var(--acc-light);border:1px solid rgba(45,106,79,0.15);border-radius:14px;padding:1.6rem;font-size:14px;color:var(--txt2);line-height:1.85;margin-bottom:1.1rem}
+[data-theme="dark"] .owner-note{border-color:rgba(74,222,128,0.12)}
+
+/* ── RESET ── */
+.btn-reset{width:100%;padding:14px;background:var(--surf2);color:var(--txt2);border:1px solid var(--border2);border-radius:13px;font-size:14px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-reset:hover{background:var(--surf3);color:var(--txt)}
+
+/* ── LEARN PANEL ── */
+.learn-panel{display:none}
+.learn-hero{height:240px;border-radius:18px;overflow:hidden;position:relative;margin-bottom:2rem}
+.learn-hero img{width:100%;height:100%;object-fit:cover;filter:brightness(0.4) saturate(0.6)}
+.lh-ov{position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,58,42,0.6),rgba(9,16,13,0.4));display:flex;flex-direction:column;justify-content:flex-end;padding:2rem}
+.lh-eye{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px}
+.lh-title{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:#fff;letter-spacing:-0.02em}
+.lh-back{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--txt3);margin-bottom:1.5rem;transition:color .2s;border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;padding:0}
+.lh-back:hover{color:var(--txt)}
+
+.tc{background:var(--surf);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:1.1rem;box-shadow:var(--shd)}
+.tc-top{height:130px;position:relative;overflow:hidden}
+.tc-top img{width:100%;height:100%;object-fit:cover;filter:brightness(0.4) saturate(0.6)}
+.tc-top-ov{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1.1rem 1.4rem;background:linear-gradient(to top,rgba(9,16,13,0.8),transparent)}
+.tc-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.01em}
+.tc-badge{font-size:9.5px;font-weight:700;padding:3px 11px;border-radius:100px;color:#fff;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);backdrop-filter:blur(4px)}
+.tc-body{padding:1.6rem}
+.tc-full{font-size:11.5px;color:var(--txt3);margin-bottom:.9rem;font-weight:500}
+.tc-formula{background:var(--surf3);border:1px solid var(--border2);border-radius:9px;padding:11px 14px;font-family:'Fira Code',monospace;font-size:12.5px;color:var(--acc2);margin-bottom:1.1rem}
+[data-theme="dark"] .tc-formula{color:#4ADE80}
+.tc-text{font-size:13.5px;color:var(--txt2);line-height:1.85;margin-bottom:.9rem}
+.tc-eg{background:var(--surf2);border-left:3px solid var(--acc2);border-radius:0 10px 10px 0;padding:12px 16px;font-size:12.5px;color:var(--txt2);margin-bottom:.9rem;line-height:1.7}
+[data-theme="dark"] .tc-eg{border-left-color:#4ADE80}
+.tc-benchmarks{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:.9rem}
+.tcb{padding:4px 13px;border-radius:100px;font-size:11.5px;font-weight:700}
+.tcb-g{background:var(--grn-bg);color:var(--grn)}
+.tcb-a{background:var(--amb-bg);color:var(--amb)}
+.tcb-r{background:var(--red-bg);color:var(--red)}
+.tc-insight{background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:13px;color:var(--txt2);line-height:1.75}
+.tc-insight strong{color:var(--txt);font-weight:700}
+
+/* ── EYEBROW ── */
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--txt3);display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;margin-top:1.5rem}
+.eyebrow::after{content:'';flex:1;height:1px;background:var(--border2)}
+
+footer{background:var(--surf);border-top:1px solid var(--border);padding:2.5rem;text-align:center}
+.ft-logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1A3A2A,#2D6A4F);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto .9rem;box-shadow:0 4px 14px rgba(26,58,42,0.28)}
+.ft-brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:5px}
+.ft-sub{font-size:12px;color:var(--txt3);line-height:1.7}
+
+@media(max-width:780px){
+  .hero-inner{grid-template-columns:1fr;gap:2rem}
+  .hero-r{display:none}
+  .ob{flex-direction:column}
+  .ob-photo{width:100%;height:140px}
+  .ob-body{border-left:1px solid;border-top:none;border-radius:0 0 18px 18px}
+  .rm-card{flex-direction:column}
+  .rm-photo{width:100%;height:140px}
+  .main{padding:2rem 1rem 4rem}
+  .nav{padding:0 1rem}
+  .hero-inner{padding:0 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-l">
+    <div class="nav-logo">🏦</div>
+    <span class="nav-brand">SME Credit Desk</span>
+    <div class="nav-sep"></div>
+    <button class="learn-link" onclick="toggleLearn()">Reference guide ↗</button>
+  </div>
+  <div class="nav-r">
+    <div class="view-seg">
+      <button class="vseg on" onclick="setView('rm')">🔒 RM</button>
+      <button class="vseg" onclick="setView('owner')">👤 Owner</button>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" id="ttog">🌙</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-photo"></div>
+  <div class="hero-mesh"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-curve"></div>
+  <div class="hero-inner">
+    <div class="hero-l">
+      <div class="hero-chip"><span class="chip-dot"></span>SME Financial Analysis · Live Tool</div>
+      <h1 class="hero-h1">Analyse financials like a<br><em>Senior Banker</em></h1>
+      <p class="hero-sub">Enter 2 audited years and 1 provisional year. Get an instant ratio analysis with red flag detection and a clear credit verdict.</p>
+      <div class="hero-btns">
+        <button class="btn-hero" onclick="document.getElementById('tool-section').scrollIntoView({behavior:'smooth'})">Start Analysis →</button>
+        <button class="btn-hero-ghost" onclick="toggleLearn()">Reference guide</button>
+      </div>
+    </div>
+    <div class="hero-r">
+      <div class="preview-card">
+        <div class="pc-label">Sample · Manufacturing SME</div>
+        <div class="pc-metrics">
+          <div class="pc-m">
+            <div class="pc-m-lbl">EBITDA Margin</div>
+            <div class="pc-m-val v-g">9.4%</div>
+            <div><span class="pc-m-tag tg-g">✓ Strong</span></div>
+            <div class="pc-bar"><div class="pc-bar-f bf-g" style="width:72%"></div></div>
+          </div>
+          <div class="pc-m">
+            <div class="pc-m-lbl">Current Ratio</div>
+            <div class="pc-m-val v-a">1.18x</div>
+            <div><span class="pc-m-tag tg-a">⚠ Caution</span></div>
+            <div class="pc-bar"><div class="pc-bar-f bf-a" style="width:52%"></div></div>
+          </div>
+          <div class="pc-m">
+            <div class="pc-m-lbl">TOL / ATNW</div>
+            <div class="pc-m-val v-g">2.31x</div>
+            <div><span class="pc-m-tag tg-g">✓ Strong</span></div>
+            <div class="pc-bar"><div class="pc-bar-f bf-g" style="width:58%"></div></div>
+          </div>
+          <div class="pc-m">
+            <div class="pc-m-lbl">Debtor Days</div>
+            <div class="pc-m-val v-r">194d</div>
+            <div><span class="pc-m-tag tg-r">🚨 Weak</span></div>
+            <div class="pc-bar"><div class="pc-bar-f bf-r" style="width:85%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<div class="trust">
+  <div class="ti"><div class="ti-dot"></div>Based on ICICI BBG norms</div>
+  <div class="ti"><div class="ti-dot"></div>Free · No API · No sign-up</div>
+  <div class="ti"><div class="ti-dot"></div>RM & Owner views</div>
+  <div class="ti"><div class="ti-dot"></div>Dark mode</div>
+  <div class="ti"><div class="ti-dot"></div>Built by ex-ICICI RM</div>
+</div>
+
+<div class="main">
+<!-- ════ TOOL ════ -->
+<div id="tool-section">
+
+  <div class="spb">
+    <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&q=80" alt="">
+    <div class="spb-ov">
+      <div class="spb-eye">Financial Analysis Tool · Input</div>
+      <div class="spb-title">Enter financial data</div>
+      <div class="spb-sub">2 audited years + 1 provisional · All figures in ₹ Lakhs</div>
+    </div>
+  </div>
+
+  <div class="err" id="err"></div>
+  <div id="form-wrap">
+
+    <!-- PROFITABILITY -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-thumb">
+          <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=120&q=80" alt="">
+          <div class="card-thumb-ico">📈</div>
+        </div>
+        <div>
+          <div class="card-title">Profitability statement</div>
+          <div class="card-sub">From P&amp;L — figures in ₹ Lakhs</div>
+        </div>
+      </div>
+      <div class="info-box">💡 <strong>FY 25-26 is provisional</strong> — highlighted in amber. Enter 0 for any unavailable line item.</div>
+      <div id="pg"></div>
+    </div>
+
+    <!-- BALANCE SHEET -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-thumb">
+          <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=120&q=80" alt="">
+          <div class="card-thumb-ico">⚖️</div>
+        </div>
+        <div>
+          <div class="card-title">Balance sheet — key items</div>
+          <div class="card-sub">Assets, liabilities &amp; networth in ₹ Lakhs</div>
+        </div>
+      </div>
+      <div id="bg"></div>
+    </div>
+
+    <!-- WORKING CAPITAL -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-thumb">
+          <img src="https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=120&q=80" alt="">
+          <div class="card-thumb-ico">🔄</div>
+        </div>
+        <div>
+          <div class="card-title">Working capital items</div>
+          <div class="card-sub">For operating cycle ratio calculations</div>
+        </div>
+      </div>
+      <div id="wg"></div>
+    </div>
+
+    <!-- DEBT — RM ONLY -->
+    <div class="card rm-only">
+      <div class="card-head">
+        <div class="card-thumb">
+          <img src="https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?w=120&q=80" alt="">
+          <div class="card-thumb-ico">💳</div>
+        </div>
+        <div>
+          <div class="card-title">Debt &amp; repayment <span class="card-badge cb-prov">RM only</span></div>
+          <div class="card-sub">For DSCR and leverage ratio calculations</div>
+        </div>
+      </div>
+      <div id="dg"></div>
+    </div>
+
+    <button class="btn-analyse" onclick="analyse()">📊 Analyse financials</button>
+  </div>
+
+  <div class="load" id="load-wrap">
+    <img class="load-photo" src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=300&q=80" alt="">
+    <div class="load-ring"></div>
+    <div class="load-t">Analysing financials...</div>
+    <div class="load-s">Applying credit norms</div>
+  </div>
+
+  <div class="res" id="res-wrap"></div>
+</div>
+
+<!-- ════ LEARN PANEL ════ -->
+<div class="learn-panel" id="learn-panel">
+  <button class="lh-back" onclick="toggleLearn()">← Back to analysis</button>
+  <div class="learn-hero">
+    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80" alt="">
+    <div class="lh-ov">
+      <div class="lh-eye">Reference Guide · Detailed Format Sheet</div>
+      <div class="lh-title">8 Ratios. Explained.</div>
+    </div>
+  </div>
+  <div id="learn-content"></div>
+</div>
+
+</div><!-- /main -->
+
+<footer>
+  <div class="ft-logo">🏦</div>
+  <div class="ft-brand">SME Credit Desk</div>
+  <div class="ft-sub">
+    Built by <strong>Rajat Sharma</strong> · Ex-Relationship Manager, ICICI Bank Business Banking Group (SME)<br>
+    MBA — Symbiosis Institute of Management Studies<br><br>
+    For educational and indicative purposes only. Not a substitute for formal credit assessment.
+  </div>
+</footer>
+
+<script>
+/* ─── CONFIG ─── */
+let VIEW='rm';
+// 3 years: FY23-24 Audited, FY24-25 Audited, FY25-26 Provisional
+const YKS=['y24','y25','y26'];
+const YLBLS=['FY 23-24\nAudited','FY 24-25\nAudited','FY 25-26\nProvisional'];
+const YPROV=[false,false,true];
+const YSRT=['FY 23-24','FY 24-25','FY 25-26 (P)'];
+const COLS='1.7fr repeat(3,1fr)';
+
+const PF=[
+  {k:'toi',l:'Total Operating Income (TOI)',h:'Total sales across all segments'},
+  {k:'ebitda',l:'EBITDA',h:'Before interest, tax, depreciation & amortisation'},
+  {k:'interest',l:'Interest expenses',h:'Total to banks and others'},
+  {k:'dep',l:'Depreciation / amortisation',h:'As per P&L'},
+  {k:'pbt',l:'Profit before tax (PBT)',h:''},
+  {k:'pat',l:'Profit after tax (PAT)',h:'Net profit after all deductions'},
+  {k:'tax',l:'Tax provision',h:''},
+];
+const BSF=[
+  {k:'shcap',l:'Share capital + Free reserves',h:'Paid-up capital + accumulated reserves'},
+  {k:'quasi',l:'Quasi equity / promoter unsecured loans',h:'Treated as near-equity by banks'},
+  {k:'grpinv',l:'Investments in group companies',h:'Cross-holdings, subsidiaries'},
+  {k:'tca',l:'Total current assets (excl. export receivables)',h:'Inventory + domestic debtors + cash + other CA'},
+  {k:'exprec',l:'Export receivables',h:'Excluded from MPBF — shown separately'},
+  {k:'tcl',l:'Total current liabilities (excl. bank borrowings)',h:'Trade creditors + provisions + other CL'},
+  {k:'nfa',l:'Net fixed assets',h:'Gross block minus accumulated depreciation'},
+];
+const WCF=[
+  {k:'dbtrs',l:'Sundry debtors — domestic',h:'Domestic receivables net of provisions'},
+  {k:'inv',l:'Inventories',h:'Raw material + WIP + finished goods'},
+  {k:'crdtrs',l:'Sundry creditors / trade payables',h:''},
+];
+const DTF=[
+  {k:'ltd',l:'Long term debt (LTD)',h:'Term loan instalment due after 1 year'},
+  {k:'std',l:'Short term debt (STD)',h:'Term loan instalment due within 1 year'},
+  {k:'wcbank',l:'Working capital bank finance',h:'CC / OD outstanding balance'},
+  {k:'tlrep',l:'Annual TL principal repayment',h:'Principal actually repaid during the year'},
+];
+
+function buildGrid(cid,fields){
+  const c=document.getElementById(cid);
+  let h=`<div style="display:grid;grid-template-columns:${COLS};gap:10px;margin-bottom:10px"><div></div>`;
+  YLBLS.forEach((y,i)=>{
+    const p=y.split('\n');
+    h+=`<div class="yr-lbl${YPROV[i]?' prov':''}">${p[0]}<br><span style="font-weight:500;opacity:0.65;font-size:9px">${p[1]}</span></div>`;
+  });
+  h+='</div>';c.innerHTML=h;
+  fields.forEach(f=>{
+    const r=document.createElement('div');
+    r.style.cssText=`display:grid;grid-template-columns:${COLS};gap:10px;align-items:center;margin-bottom:9px`;
+    let inn=`<div><div class="fl">${f.l}</div>${f.h?`<div class="fh">${f.h}</div>`:''}</div>`;
+    YKS.forEach((yk,i)=>{
+      inn+=`<div><input type="number" class="fi${YPROV[i]?' prov':''}" id="${f.k}_${yk}" placeholder="0.00" step="0.01"></div>`;
+    });
+    r.innerHTML=inn;c.appendChild(r);
+  });
+}
+buildGrid('pg',PF);buildGrid('bg',BSF);buildGrid('wg',WCF);buildGrid('dg',DTF);
+
+/* ─── THEME / VIEW ─── */
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('ttog').textContent=t==='dark'?'☀️':'🌙';
+}
+function setView(v){
+  VIEW=v;
+  document.querySelectorAll('.vseg').forEach((b,i)=>b.classList.toggle('on',(i===0&&v==='rm')||(i===1&&v==='owner')));
+  document.querySelectorAll('.rm-only').forEach(el=>el.style.display=v==='rm'?'block':'none');
+}
+function toggleLearn(){
+  const lp=document.getElementById('learn-panel');
+  const ts=document.getElementById('tool-section');
+  const show=lp.style.display==='block';
+  lp.style.display=show?'none':'block';
+  ts.style.display=show?'block':'none';
+  if(!show){buildLearn();window.scrollTo({top:document.querySelector('.trust').offsetTop,behavior:'smooth'});}
+}
+
+function gv(k,yk){return parseFloat(document.getElementById(`${k}_${yk}`)?.value)||0;}
+
+/* ─── ANALYSE ─── */
+function analyse(){
+  document.getElementById('err').style.display='none';
+  if(!gv('toi','y24')&&!gv('toi','y25')){
+    const e=document.getElementById('err');
+    e.textContent='⚠️ Please enter at least 1 audited year of Total Operating Income to generate analysis.';
+    e.style.display='block';return;
+  }
+  document.getElementById('form-wrap').style.display='none';
+  document.getElementById('load-wrap').style.display='flex';
+  setTimeout(()=>{
+    const R={};
+    YKS.forEach(yk=>{
+      const d={};
+      [...PF,...BSF,...WCF,...DTF].forEach(f=>d[f.k]=gv(f.k,yk));
+      const toi=d.toi||1,tca=d.tca||0,tcl=d.tcl||0;
+      const tnw=(d.shcap||0)+(d.quasi||0);
+      const atnw=tnw-(d.grpinv||0);
+      const td=(d.ltd||0)+(d.std||0)+(d.wcbank||0);
+      const tol=td+tcl;
+      const nca=(d.pat||0)+(d.dep||0);
+      const op=(d.ebitda||0)-(d.dep||0);
+      R[yk]={
+        ebitda_pct:d.toi>0?d.ebitda/d.toi*100:null,
+        pat_pct:d.toi>0?d.pat/d.toi*100:null,
+        cr:tcl>0?tca/tcl:null,
+        tol_tnw:tnw>0?tol/tnw:null,
+        tol_atnw:atnw>0?tol/atnw:null,
+        dscr:(d.interest+d.tlrep)>0?nca/(d.interest+d.tlrep):null,
+        dd:d.toi>0?d.dbtrs/(d.toi/365):null,
+        id:d.toi>0?d.inv/(d.toi/365):null,
+        cd:d.toi>0?d.crdtrs/(d.toi/365):null,
+        ic:d.interest>0?op/d.interest:null,
+        toi:d.toi,ebitda:d.ebitda,pat:d.pat,nca,tol,tnw,atnw,
+      };
+    });
+    render(R);
+  },1800);
+}
+
+/* ─── HELPERS ─── */
+function rate(k,v){
+  if(v===null||isNaN(v))return'na';
+  const inv={tol_tnw:[3,4],tol_atnw:[3,4],dd:[90,180],id:[60,120],cd:[60,120]};
+  if(inv[k]){const[a,b]=inv[k];return v<=a?'g':v<=b?'a':'r';}
+  const thr={ebitda_pct:[8,4],pat_pct:[3,1],cr:[1.33,1.0],dscr:[1.25,1.0],ic:[2,1]};
+  const[a,b]=thr[k]||[0,0];return v>=a?'g':v>=b?'a':'r';
+}
+function fmt(k,v){
+  if(v===null||isNaN(v))return'—';
+  if(['ebitda_pct','pat_pct'].includes(k))return v.toFixed(1)+'%';
+  if(['dd','id','cd'].includes(k))return Math.round(v)+'d';
+  return v.toFixed(2)+'x';
+}
+function rl(r){return{g:'Strong',a:'Caution',r:'Weak',na:'—'}[r]||'—';}
+function bh(k,v){
+  if(!v||v<=0)return 5;
+  const mx={ebitda_pct:20,pat_pct:10,cr:4,tol_tnw:6,tol_atnw:6,dscr:3,dd:300,id:200,cd:180,ic:5};
+  return Math.min(Math.round(v/(mx[k]||100)*100),100);
+}
+function bc(r){return{g:'#22C55E',a:'#FCD34D',r:'#F87171',na:'rgba(100,100,100,0.2)'}[r]||'#999';}
+function obcls(r){return{g:['g','Acceptable Risk','Profile meets standard credit thresholds. Ready for formal credit appraisal.'],a:['a','Moderate Risk','Some ratios need attention before sanction can be comfortably recommended.'],r:['r','High Risk','Multiple critical flags detected. Significant improvement needed before credit.']}[r];}
+
+function overall(R){
+  const yk=R['y26'].toi>0?'y26':'y25';
+  const checks=['ebitda_pct','cr','tol_tnw','dscr','dd'].map(k=>rate(k,R[yk][k]));
+  const reds=checks.filter(c=>c==='r').length,ambs=checks.filter(c=>c==='a').length;
+  return reds>=2?'r':reds||ambs>=2?'a':'g';
+}
+
+const RPHOTO={
+  ebitda_pct:'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=500&q=70',
+  cr:'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=500&q=70',
+  tol_tnw:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=500&q=70',
+  tol_atnw:'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=500&q=70',
+  dscr:'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=500&q=70',
+  dd:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=70',
+  id:'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500&q=70',
+  cd:'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=500&q=70',
+  ic:'https://images.unsplash.com/photo-1534951009808-766178b47a4f?w=500&q=70',
+};
+const OBPHOTO={
+  g:'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=700&q=80',
+  a:'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=700&q=80',
+  r:'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=700&q=80',
+};
+
+/* ─── RENDER ─── */
+function render(R){
+  document.getElementById('load-wrap').style.display='none';
+  const rv=document.getElementById('res-wrap');rv.style.display='block';
+  const ov=overall(R);
+  const[ovc,ovl,ovs]=obcls(ov);
+
+  const KR=[
+    {k:'ebitda_pct',l:'EBITDA Margin',bench:'Green >8% · Amber 4–8% · Red <4%',exp:'Core operating profitability. Negative EBITDA means losses from operations regardless of financing. Sudden unexplained jumps often signal understated purchases.'},
+    {k:'cr',l:'Current Ratio',bench:'Green >1.33x · Amber 1–1.33x · Red <1x',exp:'RBI mandates minimum 1.33x for working capital lending. Below 1x = current liabilities exceed current assets — near-automatic rejection.'},
+    {k:'tol_tnw',l:'TOL / TNW',bench:'Green <3x · Amber 3–4x · Red >4x',exp:'Total Outside Liabilities vs Tangible Net Worth. Measures leverage relative to promoter equity. High ratio = bank bears most of the default risk.'},
+    {k:'tol_atnw',l:'TOL / ATNW',bench:'Green <3x · Amber 3–4x · Red >4x',exp:'More conservative — deducts group investments from TNW. Use this when cross-holdings or intercompany loans are significant.'},
+    {k:'dscr',l:'DSCR',bench:'Green >1.25x · Amber 1–1.25x · Red <1x',exp:'Net Cash Accruals vs annual debt service. Below 1x = operations cannot cover repayments. Relevant for term loan cases only.'},
+    {k:'dd',l:'Debtor Days',bench:'Green <90d · Amber 90–180d · Red >180d',exp:'Rising debtor days = money stuck in receivables. May signal inflated sales or bad debts not written off. Always cross-check with GST.'},
+    {k:'id',l:'Inventory Days',bench:'Green <60d · Amber 60–120d · Red >120d',exp:'High or rising inventory days can signal slow-moving stock or overstatement of closing inventory — a common manipulation technique.'},
+    {k:'cd',l:'Creditor Days',bench:'Green <60d · Amber 60–120d · Red >120d',exp:'Very high creditor days = liquidity stress or strained supplier relationships. Gap between debtor days and creditor days = your WC need.'},
+    {k:'ic',l:'Interest Cover',bench:'Green >2x · Amber 1–2x · Red <1x',exp:'Operating profit vs interest. Below 1x = earnings cannot cover interest — the account will NPA as unpaid interest compounds.'},
+  ];
+
+  const rcHtml=KR.map(r=>{
+    const vals=YKS.map(yk=>R[yk][r.k]);
+    const lr=rate(r.k,vals[2]??vals[1]??vals[0]);
+    const bars=YKS.map((yk,i)=>{
+      const v=R[yk][r.k];const vr=rate(r.k,v);const h=bh(r.k,v);
+      const ovl={g:'rc-ov',a:'rc-ov',r:'rc-ov',na:'rc-ov'}[vr]||'rc-ov';
+      return `<div class="rb"><div class="rb-track"><div class="rb-fill" style="height:${h}%;background:${bc(vr)}"></div></div><div class="rb-val" style="color:${bc(vr)}">${fmt(r.k,v)}</div><div class="rb-yr">${YSRT[i]}</div></div>`;
+    }).join('');
+    const bgOverlay=lr==='g'?'linear-gradient(to top,rgba(22,101,52,0.7),transparent)':lr==='a'?'linear-gradient(to top,rgba(146,64,14,0.7),transparent)':'linear-gradient(to top,rgba(153,27,27,0.7),transparent)';
+    const exp=VIEW==='rm'?`<div class="rc-exp">${r.exp}</div>`:'';
+    return `<div class="rc">
+      <div class="rc-photo"><img src="${RPHOTO[r.k]}" alt="${r.l}" loading="lazy">
+        <div class="rc-ov" style="background:${bgOverlay}">
+          <div class="rc-name">${r.l}</div>
+          <span class="rc-pill rp-${lr}">${rl(lr)}</span>
+        </div>
+      </div>
+      <div class="rc-body">
+        <div class="rc-bars">${bars}</div>
+        <div class="rc-bench">📏 ${r.bench}</div>${exp}
+      </div>
+    </div>`;
+  }).join('');
+
+  const trows=[
+    {l:'Total Operating Income (₹L)',k:'toi',f:v=>v?v.toFixed(2):'—',r:false},
+    {l:'EBITDA (₹L)',k:'ebitda',f:v=>v?v.toFixed(2):'—',r:false},
+    {l:'EBITDA Margin',k:'ebitda_pct',f:v=>v?v.toFixed(2)+'%':'—',r:true},
+    {l:'PAT (₹L)',k:'pat',f:v=>v?v.toFixed(2):'—',r:false},
+    {l:'Net Cash Accruals (₹L)',k:'nca',f:v=>v?v.toFixed(2):'—',r:false},
+    {l:'Current Ratio',k:'cr',f:v=>v?v.toFixed(2)+'x':'—',r:true},
+    {l:'TOL / TNW',k:'tol_tnw',f:v=>v?v.toFixed(2)+'x':'—',r:true},
+    {l:'TOL / ATNW',k:'tol_atnw',f:v=>v?v.toFixed(2)+'x':'—',r:true},
+    {l:'DSCR',k:'dscr',f:v=>v?v.toFixed(2)+'x':'—',r:true},
+    {l:'Debtor Days',k:'dd',f:v=>v?Math.round(v)+'d':'—',r:true},
+    {l:'Inventory Days',k:'id',f:v=>v?Math.round(v)+'d':'—',r:true},
+    {l:'Creditor Days',k:'cd',f:v=>v?Math.round(v)+'d':'—',r:true},
+    {l:'Interest Cover',k:'ic',f:v=>v?v.toFixed(2)+'x':'—',r:true},
+  ];
+
+  const tableHtml=`<div class="tbl-wrap"><table>
+    <thead><tr><th>Metric</th>${YSRT.map(y=>`<th>${y}</th>`).join('')}</tr></thead>
+    <tbody>${trows.map(row=>`<tr class="${row.k==='nca'?'':''}">
+      <td>${row.l}</td>
+      ${YKS.map(yk=>{
+        const v=R[yk][row.k];const r2=row.r?rate(row.k,v):'';
+        const cls=r2?` class="c${r2}"`:' ';
+        const dot=r2&&r2!=='na'?`<span class="cdot" style="background:${bc(r2)}"></span>`:'';
+        return `<td${cls}>${dot}${row.f(v)}</td>`;
+      }).join('')}
+    </tr>`).join('')}
+    </tbody></table></div>`;
+
+  const lk=R['y26'].toi>0?'y26':'y25',pk='y24';
+  const lr2=R[lk],pr=R[pk];
+  const flags=[];
+  if(lr2.ebitda_pct!==null&&lr2.ebitda_pct<4)flags.push({c:'r',i:'🚨',m:`EBITDA margin is ${lr2.ebitda_pct?.toFixed(1)}% — below 4%. Core operations are barely profitable. Working capital lending at this margin carries very high risk.`});
+  if(lr2.cr!==null&&lr2.cr<1.33)flags.push({c:'a',i:'⚠️',m:`Current Ratio is ${lr2.cr?.toFixed(2)}x — below RBI's 1.33x minimum for working capital lending.`});
+  if(lr2.dd&&pr.dd&&lr2.dd>pr.dd*1.2)flags.push({c:'r',i:'🚨',m:`Debtor days rose from ${Math.round(pr.dd)}d to ${Math.round(lr2.dd)}d — a ${Math.round((lr2.dd/pr.dd-1)*100)}% increase. Cross-check with GST returns to verify reported sales are genuine.`});
+  if(lr2.tol_tnw!==null&&lr2.tol_tnw>4)flags.push({c:'r',i:'🚨',m:`TOL/TNW is ${lr2.tol_tnw?.toFixed(2)}x — above 4x. Heavily over-leveraged. Promoter equity is very thin relative to total external obligations.`});
+  if(lr2.dscr!==null&&lr2.dscr>0&&lr2.dscr<1.25)flags.push({c:'a',i:'⚠️',m:`DSCR is ${lr2.dscr?.toFixed(2)}x — below 1.25x. Business may struggle to service term loan repayments from internal accruals.`});
+  if(lr2.id&&pr.id&&lr2.id>pr.id*1.3)flags.push({c:'a',i:'⚠️',m:`Inventory days jumped from ${Math.round(pr.id)}d to ${Math.round(lr2.id)}d. Investigate for slow-moving stock or potential overstatement of closing inventory.`});
+  if(lr2.ic!==null&&lr2.ic<1)flags.push({c:'r',i:'🚨',m:`Interest cover is ${lr2.ic?.toFixed(2)}x — below 1x. Operating profit cannot cover interest costs. NPA risk is high if this trend continues.`});
+  if(!flags.length)flags.push({c:'g',i:'✅',m:'No critical red flags detected. Profile appears creditworthy. Proceed with formal appraisal and bank statement verification.'});
+  const flagHtml=flags.map(f=>`<div class="flag ${f.c}"><span class="fi2">${f.i}</span><span class="ft">${f.m}</span></div>`).join('');
+
+  const rmNote=ov==='g'
+    ?`This profile looks acceptable for credit consideration. EBITDA margins are stable, leverage is within limits, and liquidity ratios are adequate. I would proceed with formal appraisal — request the last 12 months of bank statements to cross-verify reported debtors and turnover before final sanction.`
+    :ov==='a'
+    ?`There are one or two concerns I would want addressed before recommending sanction. Request a CA-certified explanation for the flagged ratios and cross-check debtor ageing with GST returns. A conditional sanction with financial covenants may be possible.`
+    :`Multiple critical red flags make credit very difficult to justify at this stage. I would not recommend proceeding without significant improvement — particularly in EBITDA margin, leverage, and liquidity. Strengthen the balance sheet first.`;
+
+  const ownerNote=ov==='g'
+    ?`Your financial profile looks healthy. Your business shows adequate profitability, manageable debt, and reasonable liquidity. You are well-positioned to approach a bank. Make sure audited financials and 12 months of bank statements are ready.`
+    :ov==='a'
+    ?`Your financials show areas banks will examine closely. Work with your CA on the flagged items before your formal application to improve approval chances and get better terms.`
+    :`Your current financials have gaps that make bank approval difficult right now. Address the flagged areas over the next 1–2 quarters before approaching a bank.`;
+
+  const rmSec=VIEW==='rm'?`
+    <div class="eyebrow">3-year trend · All ratios</div>
+    <div class="card" style="margin-bottom:1.5rem;padding:1.5rem">${tableHtml}</div>
+    <div class="eyebrow">Red flag analysis</div>
+    <div style="margin-bottom:1.5rem">${flagHtml}</div>
+    <div class="rm-card">
+      <div class="rm-photo">
+        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=80" alt="RM">
+        <div class="rm-photo-ov">
+          <div class="rm-av">👔</div>
+          <div class="rm-name">Senior RM</div>
+          <div class="rm-role">BBG · SME Credit</div>
+        </div>
+      </div>
+      <div class="rm-body">
+        <div class="rm-quote">"${rmNote}"</div>
+        <div class="rm-by">Based on ICICI Business Banking Group credit norms</div>
+      </div>
+    </div>`
+    :`<div class="owner-note">${ownerNote}</div>`;
+
+  rv.innerHTML=`
+    <div class="ob ob-${ovc}">
+      <div class="ob-photo"><img src="${OBPHOTO[ovc]}" alt=""></div>
+      <div class="ob-body">
+        <div class="ob-eye">Overall financial health · ${VIEW==='rm'?'RM View':'Owner View'}</div>
+        <div class="ob-title">${ovl}</div>
+        <div class="ob-sub">${ovs}</div>
+      </div>
+    </div>
+    <div class="eyebrow">Ratio analysis · 9 key metrics</div>
+    <div class="rg">${rcHtml}</div>
+    ${rmSec}
+    <button class="btn-reset" onclick="resetForm()">← Re-enter financials</button>
+  `;
+  rv.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetForm(){
+  document.getElementById('res-wrap').style.display='none';
+  document.getElementById('load-wrap').style.display='none';
+  document.getElementById('form-wrap').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ─── LEARN ─── */
+const LPHOTO={
+  'EBITDA Margin':'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&q=70',
+  'Current Ratio':'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&q=70',
+  'TOL / TNW':'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=70',
+  'DSCR':'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=800&q=70',
+  'Debtor Days':'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=70',
+  'Inventory Days':'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=70',
+  'Creditor Days':'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=70',
+  'Interest Cover':'https://images.unsplash.com/photo-1534951009808-766178b47a4f?w=800&q=70',
+};
+const LBADGE={'EBITDA Margin':'Profitability','Current Ratio':'Liquidity','TOL / TNW':'Leverage','DSCR':'Repayment','Debtor Days':'Efficiency','Inventory Days':'Efficiency','Creditor Days':'Liquidity','Interest Cover':'Solvency'};
+const RATIOS=[
+  {n:'EBITDA Margin',full:'Earnings Before Interest, Tax, Dep & Amortisation ÷ TOI',f:'EBITDA ÷ Total Operating Income × 100',
+   body:`EBITDA tells you how profitable core operations are — before financing costs, accounting adjustments, and taxes. It answers: "If this business had zero debt and zero tax, how much would it earn from operations alone?" Banks use EBITDA because it strips away financing structure and focuses purely on operating performance.`,
+   eg:`Sales ₹5 Crore. After all operating costs, EBITDA = ₹40 Lakhs. Margin = 40 ÷ 500 × 100 = 8%. Every ₹100 of sales generates ₹8 of operating profit before interest and depreciation.`,
+   bench:['✅ Above 8%','⚠️ 4–8%','🚨 Below 4%'],
+   insight:`Watch for sudden margin jumps — if EBITDA jumps from 5% to 15% without explanation, purchases are likely understated or expenses deferred. Cross-check with GST purchase data and compare Cost of Goods Sold vs previous years.`},
+  {n:'Current Ratio',full:'Total Current Assets ÷ Current Liabilities (ex-bank borrowings)',f:'Total CA ÷ Other CL (excluding bank)',
+   body:`Measures whether a business can meet short-term obligations using short-term assets. RBI mandates a minimum of 1.33x for working capital lending. This means for every ₹100 of current liabilities, the business must have ₹133 of current assets — leaving a 25% Net Working Capital buffer funded from long-term sources.`,
+   eg:`Current Assets ₹80L, Current Liabilities (ex-bank) ₹45L. Ratio = 80 ÷ 45 = 1.78x. Above 1.33x — meets RBI minimum NWC norm for working capital consideration.`,
+   bench:['✅ Above 1.33x','⚠️ 1.0–1.33x','🚨 Below 1.0x'],
+   insight:`Below 1.0x = near-automatic rejection at most banks. Also watch for artificially inflated current assets (overstated debtors or inventory) created just to meet this ratio. Cross-check debtors with bank statements and GST data.`},
+  {n:'TOL / TNW',full:'Total Outside Liabilities ÷ Tangible Net Worth',f:'(All Debt + Trade Creditors + All Liabilities) ÷ (Share Cap + Reserves − Intangibles)',
+   body:`Measures how leveraged a business is relative to its own equity. TOL includes all bank borrowings, creditors, provisions, and unsecured loans. TNW is the promoter's real equity — paid-up capital plus reserves, minus intangible assets. High ratio = business runs mostly on borrowed money.`,
+   eg:`Bank Loans ₹120L + Creditors ₹30L + Other ₹20L = TOL ₹170L. Share Cap + Reserves ₹80L − Intangibles ₹5L = TNW ₹75L. TOL/TNW = 170 ÷ 75 = 2.27x. Within green zone.`,
+   bench:['✅ Below 3x','⚠️ 3–4x','🚨 Above 4x'],
+   insight:`TOL/ATNW is more conservative — it also deducts group investments from TNW. ICICI BBG typically uses TOL/ATNW as the primary leverage metric for SME accounts where intercompany loans are present.`},
+  {n:'DSCR',full:'Debt Service Coverage Ratio',f:'Net Cash Accruals (PAT + Dep) ÷ (Annual Interest + TL Principal Repayment)',
+   body:`Answers the most critical question in term lending: "Can this business repay its loans from its own earnings?" NCA = PAT + Depreciation (non-cash, added back). Below 1.0x means operations cannot cover obligations and the business must rely on asset sales or fresh borrowing to repay.`,
+   eg:`PAT ₹25L + Dep ₹8L = NCA ₹33L. Interest ₹12L + TL principal ₹15L = Debt Service ₹27L. DSCR = 33 ÷ 27 = 1.22x. Below 1.25x — bank would likely ask for longer tenure or additional collateral.`,
+   bench:['✅ Above 1.25x','⚠️ 1.0–1.25x','🚨 Below 1.0x'],
+   insight:`DSCR is only relevant for term loan cases — not for pure working capital (CC/OD). For CC/OD, focus on Current Ratio and MPBF instead. High-depreciation businesses (manufacturing) often have better DSCR than their PAT suggests.`},
+  {n:'Debtor Days',full:'Sundry Debtors ÷ (Total Sales ÷ 365)',f:'Domestic Debtors ÷ (TOI ÷ 365)',
+   body:`Tells you how many days on average a business takes to collect from customers. Rising debtor days means money is stuck and more working capital is needed. Rising faster than sales growth can mean sales recorded but not collected, customers defaulting, or credit extended to inflate volumes.`,
+   eg:`Debtors ₹90L, Annual Sales ₹360L. Daily Sales = ₹0.986L. Debtor Days = 90 ÷ 0.986 = 91 days. Borderline. If this was 60 days last year, it is a red flag.`,
+   bench:['✅ Below 90 days','⚠️ 90–180 days','🚨 Above 180 days'],
+   insight:`Always compare with industry norms. Construction may have 180+ days legitimately. Retail should be near zero. The red flag is when a company's own debtor days are rising year-on-year — especially faster than sales growth.`},
+  {n:'Inventory Days',full:'Inventory ÷ (Total Sales ÷ 365)',f:'Inventories ÷ (TOI ÷ 365)',
+   body:`Tells you how many days of sales is sitting in stock. High or rising inventory days = stock building up — possibly slow sales, seasonal stockpiling, or inflated values. Inventory inflation is one of the most common CMA manipulation techniques — overstating closing stock reduces COGS on paper, inflating EBITDA without real cash improvement.`,
+   eg:`Inventory ₹15L, Annual Sales ₹300L. Daily Sales = ₹0.82L. Inventory Days = 18 days. Low and healthy for trading. Compare with the assumptions sheet — if they don't match, the WC limit calculation is wrong.`,
+   bench:['✅ Below 60 days','⚠️ 60–120 days','🚨 Above 120 days'],
+   insight:`Cross-check inventory days against the CMA Assumptions sheet. If RM assumed 30 days but Balance Sheet shows 90, the working capital limit and drawing power are significantly understated.`},
+  {n:'Creditor Days',full:'Sundry Creditors ÷ (Total Sales ÷ 365)',f:'Trade Creditors ÷ (TOI ÷ 365)',
+   body:`Tells you how long a business takes to pay suppliers. Moderate is normal (30–60 days). Very high = liquidity stress or strained supplier relationships. The debtor-creditor gap is critical — if debtors are 150 days but creditors are 30 days, the bank must fund a 120-day working capital gap via CC/OD.`,
+   eg:`Creditors ₹40L, Annual Sales ₹480L. Creditor Days = 40 ÷ 1.315 = 30 days. Healthy. Paying suppliers within a month shows good liquidity management.`,
+   bench:['✅ Below 60 days','⚠️ 60–120 days','🚨 Above 120 days'],
+   insight:`Very low creditor days can also be a flag — suppliers may be demanding advance payment because they don't trust the business. In TREDS cases, high creditor days are acceptable because the bank specifically funds the receivables.`},
+  {n:'Interest Cover',full:'Operating Profit (EBITDA − Dep) ÷ Annual Interest',f:'(EBITDA − Depreciation) ÷ Interest Expenses',
+   body:`Measures how many times a business can pay its interest from operating profit. Below 1x means earnings cannot cover even interest — the business is effectively insolvent from an operating standpoint. This is exactly how NPA accounts develop: interest is debited monthly, never recovered, outstanding balloons month after month.`,
+   eg:`EBITDA ₹30L − Dep ₹8L = Operating Profit ₹22L. Interest ₹18L. Cover = 22 ÷ 18 = 1.22x. Below 2x. Bank would impose higher interest reserve or require additional security before enhancing limits.`,
+   bench:['✅ Above 2x','⚠️ 1–2x','🚨 Below 1x'],
+   insight:`Interest cover below 1x on a CC account is the earliest NPA warning sign. By SMA-2 (60 days overdue), the problem is already deep. Review interest cover quarterly for all active accounts — it is your earliest warning system.`},
+];
+
+function buildLearn(){
+  document.getElementById('learn-content').innerHTML=RATIOS.map(r=>`
+    <div class="tc">
+      <div class="tc-top">
+        <img src="${LPHOTO[r.n]}" alt="${r.n}" loading="lazy">
+        <div class="tc-top-ov">
+          <div class="tc-name">${r.n}</div>
+          <span class="tc-badge">${LBADGE[r.n]}</span>
+        </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-full">${r.full}</div>
+        <div class="tc-formula">Formula: ${r.f}</div>
+        <div class="tc-text">${r.body}</div>
+        <div class="tc-eg"><strong>📌 Example:</strong> ${r.eg}</div>
+        <div class="tc-benchmarks">${r.bench.map((b,i)=>`<span class="tcb ${['tcb-g','tcb-a','tcb-r'][i]}">${b}</span>`).join('')}</div>
+        <div class="tc-insight"><strong>🎓 RM Insight — </strong>${r.insight}</div>
+      </div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
