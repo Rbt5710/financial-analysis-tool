@@ -396,11 +396,11 @@ footer{background:var(--surf);border-top:1px solid var(--border);padding:2.5rem;
 
 <!-- TRUST -->
 <div class="trust">
-  <div class="ti"><div class="ti-dot"></div>Based on ICICI BBG norms</div>
+  <div class="ti"><div class="ti-dot"></div>Based on Banking norms</div>
   <div class="ti"><div class="ti-dot"></div>Free · No API · No sign-up</div>
   <div class="ti"><div class="ti-dot"></div>RM & Owner views</div>
   <div class="ti"><div class="ti-dot"></div>Dark mode</div>
-  <div class="ti"><div class="ti-dot"></div>Built by ex-ICICI RM</div>
+  <div class="ti"><div class="ti-dot"></div>Built by Banker</div>
 </div>
 
 <div class="main">
@@ -512,8 +512,8 @@ footer{background:var(--surf);border-top:1px solid var(--border);padding:2.5rem;
   <div class="ft-logo">🏦</div>
   <div class="ft-brand">SME Credit Desk</div>
   <div class="ft-sub">
-    Built by <strong>Rajat Sharma</strong> · Ex-Relationship Manager, ICICI Bank Business Banking Group (SME)<br>
-    MBA — Symbiosis Institute of Management Studies<br><br>
+    Built by <strong>Rajat Sharma</strong> · Banker<br>
+    <br><br>
     For educational and indicative purposes only. Not a substitute for formal credit assessment.
   </div>
 </footer>
@@ -800,7 +800,7 @@ function render(R){
       </div>
       <div class="rm-body">
         <div class="rm-quote">"${rmNote}"</div>
-        <div class="rm-by">Based on ICICI Business Banking Group credit norms</div>
+        <div class="rm-by">Based on Banking norms</div>
       </div>
     </div>`
     :`<div class="owner-note">${ownerNote}</div>`;
@@ -856,7 +856,7 @@ const RATIOS=[
    body:`Measures how leveraged a business is relative to its own equity. TOL includes all bank borrowings, creditors, provisions, and unsecured loans. TNW is the promoter's real equity — paid-up capital plus reserves, minus intangible assets. High ratio = business runs mostly on borrowed money.`,
    eg:`Bank Loans ₹120L + Creditors ₹30L + Other ₹20L = TOL ₹170L. Share Cap + Reserves ₹80L − Intangibles ₹5L = TNW ₹75L. TOL/TNW = 170 ÷ 75 = 2.27x. Within green zone.`,
    bench:['✅ Below 3x','⚠️ 3–4x','🚨 Above 4x'],
-   insight:`TOL/ATNW is more conservative — it also deducts group investments from TNW. ICICI BBG typically uses TOL/ATNW as the primary leverage metric for SME accounts where intercompany loans are present.`},
+   insight:`TOL/ATNW is more conservative — it also deducts group investments from TNW. Banking typically uses TOL/ATNW as the primary leverage metric for SME accounts where intercompany loans are present.`},
   {n:'DSCR',full:'Debt Service Coverage Ratio',f:'Net Cash Accruals (PAT + Dep) ÷ (Annual Interest + TL Principal Repayment)',
    body:`Answers the most critical question in term lending: "Can this business repay its loans from its own earnings?" NCA = PAT + Depreciation (non-cash, added back). Below 1.0x means operations cannot cover obligations and the business must rely on asset sales or fresh borrowing to repay.`,
    eg:`PAT ₹25L + Dep ₹8L = NCA ₹33L. Interest ₹12L + TL principal ₹15L = Debt Service ₹27L. DSCR = 33 ÷ 27 = 1.22x. Below 1.25x — bank would likely ask for longer tenure or additional collateral.`,
